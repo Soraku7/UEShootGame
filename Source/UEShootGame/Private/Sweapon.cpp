@@ -3,7 +3,9 @@
 
 #include "Sweapon.h"
 
+#include "IMessageTracer.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 
 // Sets default values
@@ -16,6 +18,7 @@ ASweapon::ASweapon()
 	RootComponent = MeshComp;
 
 	MuzzleSocketName = "MuzzleSocket";
+	TracerTargetName = "Target";
 }
 
 // Called when the game starts or when spawned
@@ -45,6 +48,8 @@ void ASweapon::Fire()
 		QueryParams.AddIgnoredActor(this);
 		//复合追踪 用于细致追踪到目标网格体的三角形 方便确认位置
 		QueryParams.bTraceComplex = true;
+
+		FVector TracerEndPoint = TraceEnd;
 		
 		//发出射线
 		FHitResult Hit;
@@ -59,6 +64,9 @@ void ASweapon::Fire()
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld() , ImpactEffect , Hit.ImpactPoint , Hit.ImpactNormal.Rotation());
 
 			}
+
+			//射线最终位置
+			TracerEndPoint = Hit.ImpactPoint;
 		}
 
 		DrawDebugLine(GetWorld() , EyeLocation , TraceEnd , FColor::White , false , 1.0f , 0 , 1.0f);
@@ -67,6 +75,16 @@ void ASweapon::Fire()
 		{
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect , MeshComp , MuzzleSocketName);
 
+		}
+
+		if(TracerEffect)
+		{
+			FVector	MuzzleLocation = MeshComp -> GetSocketLocation(MuzzleSocketName);
+			UParticleSystemComponent* TracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld() , TracerEffect , MuzzleLocation);
+			if(TracerComp)
+			{
+				TracerComp -> SetVectorParameter(TracerTargetName , TracerEndPoint);
+			}
 		}
 	}
 	
