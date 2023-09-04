@@ -2,8 +2,6 @@
 
 
 #include "Sweapon.h"
-
-#include "IMessageTracer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -21,12 +19,7 @@ ASweapon::ASweapon()
 	TracerTargetName = "Target";
 }
 
-// Called when the game starts or when spawned
-void ASweapon::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
+
 
 void ASweapon::Fire()
 {
@@ -71,28 +64,27 @@ void ASweapon::Fire()
 
 		DrawDebugLine(GetWorld() , EyeLocation , TraceEnd , FColor::White , false , 1.0f , 0 , 1.0f);
 
-		if(MuzzleEffect)
-		{
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect , MeshComp , MuzzleSocketName);
-
-		}
-
-		if(TracerEffect)
-		{
-			FVector	MuzzleLocation = MeshComp -> GetSocketLocation(MuzzleSocketName);
-			UParticleSystemComponent* TracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld() , TracerEffect , MuzzleLocation);
-			if(TracerComp)
-			{
-				TracerComp -> SetVectorParameter(TracerTargetName , TracerEndPoint);
-			}
-		}
+		PlayFireEffect(TracerEndPoint);
 	}
 	
 }
 
-// Called every frame
-void ASweapon::Tick(float DeltaTime)
+void ASweapon::PlayFireEffect(FVector TraceEnd)
+{if(MuzzleEffect)
 {
-	Super::Tick(DeltaTime);
+	UGameplayStatics::SpawnEmitterAttached(MuzzleEffect , MeshComp , MuzzleSocketName);
+
+}
+
+	if(TracerEffect)
+	{
+		FVector	MuzzleLocation = MeshComp -> GetSocketLocation(MuzzleSocketName);
+		UParticleSystemComponent* TracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld() , TracerEffect , MuzzleLocation);
+		if(TracerComp)
+		{
+			//修改粒子参数
+			TracerComp -> SetVectorParameter(TracerTargetName , TraceEnd);
+		}
+	}
 }
 
