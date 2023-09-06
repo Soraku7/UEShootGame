@@ -32,6 +32,7 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//获取默认视场
 	DefaultFOV = CameraComp -> FieldOfView;
 
 	//设置碰撞参数

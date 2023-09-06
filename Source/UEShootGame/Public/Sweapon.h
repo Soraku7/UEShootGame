@@ -34,12 +34,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
 	UParticleSystem* MuzzleEffect;
 
+	//击中身体特效
 	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
-	UParticleSystem* ImpactEffect;
+	UParticleSystem* FleshImpactEffect;
+
+	//击中物体特效
+	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
+	UParticleSystem* DefultImpactEffect;
 	
 	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
 	UParticleSystem* TracerEffect;
 
+	UPROPERTY(EditDefaultsOnly , Category = "Weapon")
+	TSubclassOf<UCameraShakeBase> FireCamShake;
 	
 public:
 	UFUNCTION(BlueprintCallable , Category = "Weapon")
