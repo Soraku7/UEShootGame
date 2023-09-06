@@ -5,7 +5,7 @@
 #include "UEShootGame/UEShootGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "PhysicalMaterials/PhysicalMaterial.h"
+
 
 
 // Sets default values
@@ -19,8 +19,17 @@ ASweapon::ASweapon()
 
 	MuzzleSocketName = "MuzzleSocket";
 	TracerTargetName = "Target";
+
+	BaseDamage = 20.0f;
+	RateOfFire = 600;
 }
 
+void ASweapon::BeginPlay()
+{
+	Super::BeginPlay();
+
+	TimeBetweenShots = 60 / RateOfFire;
+}
 
 
 void ASweapon::Fire()
@@ -49,16 +58,24 @@ void ASweapon::Fire()
 		
 		//发出射线
 		FHitResult Hit;
-		if(GetWorld() -> LineTraceSingleByChannel(Hit , EyeLocation , TraceEnd , ECC_GameTraceChannel1 , QueryParams))
+		if(GetWorld() -> LineTraceSingleByChannel(Hit , EyeLocation , TraceEnd , COLLISION_WEAPON , QueryParams))
 		{
-			//受到伤害 进行受击处理
+			//获取受击Actor
 			AActor* HitActor = Hit.GetActor();
-			UGameplayStatics::ApplyPointDamage(HitActor , 20.0f , ShotDirection , Hit , MyOwner->GetInstigatorController() , this , DamageType);
 			
-
 			//获取SurfaceType
 			EPhysicalSurface SurfaceType =UGameplayStatics::GetSurfaceType(Hit);
 			UParticleSystem* SelectedEffect = nullptr;
+			
+			float ActualDamage = BaseDamage;
+			if(SurfaceType == SURFACE_FLESHVULNERABLE)
+			{
+				ActualDamage *= 4.0f;
+			}
+			
+
+			//造成伤害
+			UGameplayStatics::ApplyPointDamage(HitActor , ActualDamage , ShotDirection , Hit , MyOwner->GetInstigatorController() , this , DamageType);
 			switch (SurfaceType)
 			{
 				case SURFACE_FLESHDEFAULT:
@@ -82,7 +99,24 @@ void ASweapon::Fire()
 
 		PlayFireEffect(TracerEndPoint);
 	}
-	
+
+	//确定射击时间
+	LastFireTime = GetWorld() -> TimeSeconds;
+}
+
+void ASweapon::StartFire()
+{
+	float FirstDelay = FMath::Max(0.0f ,  LastFireTime + TimeBetweenShots - GetWorld() -> TimeSeconds);
+	//FirstDelay 如果为负 则在后续函数为0
+	//设置FirestDelay 防止连点快速射击
+	//设置定时器
+	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots ,this , &ASweapon::Fire , TimeBetweenShots , true , FirstDelay);
+}
+
+void ASweapon::StopFire()
+{
+	//暂停定时器
+	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
 }
 
 void ASweapon::PlayFireEffect(FVector TraceEnd)
@@ -109,7 +143,7 @@ void ASweapon::PlayFireEffect(FVector TraceEnd)
 		APlayerController* PC = Cast<APlayerController>(MyOwner -> GetController());
 		if(PC)
 		{
-			PC -> ClientPlayCameraShake(FireCamShake);
+			PC -> ClientStartCameraShake(FireCamShake);
 		}
 	}
 }
