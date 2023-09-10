@@ -120,7 +120,8 @@ void ASweapon::StopFire()
 }
 
 void ASweapon::PlayFireEffect(FVector TraceEnd)
-{if(MuzzleEffect)
+{
+	if(MuzzleEffect)
 {
 	UGameplayStatics::SpawnEmitterAttached(MuzzleEffect , MeshComp , MuzzleSocketName);
 

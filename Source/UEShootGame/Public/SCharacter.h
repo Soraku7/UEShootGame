@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SHealthComponent.h"
 #include "Sweapon.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
@@ -35,7 +36,8 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere , Blueprintable , Category = "Components")
 	USpringArmComponent* SpringArmComp;
-
+	
+	USHealthComponent* HealthComp;
 	//对焦
 	bool bWantsToZoom;
 
@@ -62,7 +64,13 @@ protected:
 	
 	void StartFire();
 	void StopFire();
-	
+
+	UFUNCTION()
+	void OnHealthChanged(USHealthComponent*  HealthComponent
+	, float  Health , float  HealthDelta , const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UPROPERTY(BlueprintReadOnly , Category = "Player")
+	bool bDied;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

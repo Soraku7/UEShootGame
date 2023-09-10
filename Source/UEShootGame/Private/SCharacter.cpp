@@ -3,8 +3,10 @@
 
 #include "UEShootGame/Public/SCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "UEShootGame/UEShootGame.h"
 
 
 // Sets default values
@@ -14,6 +16,7 @@ ASCharacter::ASCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
+	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
 	CameraComp -> SetupAttachment(SpringArmComp);
 	
 	SpringArmComp -> SetupAttachment(RootComponent);
@@ -21,7 +24,8 @@ ASCharacter::ASCharacter()
 	SpringArmComp -> bUsePawnControlRotation = true;
 
 	GetMovementComponent() -> GetNavAgentPropertiesRef().bCanCrouch = true;
-
+	
+	GetCapsuleComponent() -> SetCollisionResponseToChannel(COLLISION_WEAPON , ECR_Ignore);
 	ZoomedFOV = 65.0f;
 	ZoomInterSpeed = 20.0f;
 	WeaponAttachSocketName = "WeaponSocket";
@@ -48,6 +52,7 @@ void ASCharacter::BeginPlay()
 		CurrentWeapon -> AttachToComponent(GetMesh() , FAttachmentTransformRules::SnapToTargetNotIncludingScale , "WeaponSocket");
 	}
 
+	HealthComp -> OnHealthChanged.AddDynamic(this , &ASCharacter::OnHealthChanged);
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -93,6 +98,19 @@ void ASCharacter::StopFire()
 	if(CurrentWeapon)
 	{
 		CurrentWeapon -> StopFire();
+	}
+}
+
+void ASCharacter::OnHealthChanged(USHealthComponent* HealthComponent, float Health, float HealthDelta,
+	const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if(Health <= 0.0f && !bDied)
+	{
+		bDied = true;
+		
+		//停止目标移动
+		GetMovementComponent() -> StopMovementImmediately();
+		GetCapsuleComponent() -> SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
