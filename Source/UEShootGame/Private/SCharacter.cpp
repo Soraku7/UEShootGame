@@ -111,6 +111,10 @@ void ASCharacter::OnHealthChanged(USHealthComponent* HealthComponent, float Heal
 		//停止目标移动
 		GetMovementComponent() -> StopMovementImmediately();
 		GetCapsuleComponent() -> SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		//销毁Pawn
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(10.0f);
 	}
 }
 

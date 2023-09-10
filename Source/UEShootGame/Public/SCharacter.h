@@ -64,7 +64,16 @@ protected:
 	
 	void StartFire();
 	void StopFire();
-
+	
+	/**
+	 * 玩家是否死亡
+	 * @param HealthComponent 
+	 * @param Health 
+	 * @param HealthDelta 
+	 * @param DamageType 
+	 * @param InstigatedBy 
+	 * @param DamageCauser 
+	 */
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent*  HealthComponent
 	, float  Health , float  HealthDelta , const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
