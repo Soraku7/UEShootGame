@@ -22,6 +22,9 @@ ASweapon::ASweapon()
 
 	BaseDamage = 20.0f;
 	RateOfFire = 600;
+
+	//允许当前Actor可以被服务器复制
+	SetReplicates(true);
 }
 
 void ASweapon::BeginPlay()
@@ -34,6 +37,11 @@ void ASweapon::BeginPlay()
 
 void ASweapon::Fire()
 {
+	//如果不是在服务器上 就执行ServerFire
+	if(GetLocalRole() < ROLE_Authority)
+	{
+		ServerFire();
+	}
 	AActor* MyOwner = GetOwner();
 	if(MyOwner)
 	{
@@ -102,6 +110,16 @@ void ASweapon::Fire()
 
 	//确定射击时间
 	LastFireTime = GetWorld() -> TimeSeconds;
+}
+
+void ASweapon::ServerFire_Implementation()
+{
+	Fire();
+}
+
+bool ASweapon::ServerFire_Validate()
+{
+	return true;
 }
 
 void ASweapon::StartFire()

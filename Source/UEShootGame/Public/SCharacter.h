@@ -53,9 +53,7 @@ protected:
 
 	void BeginZoom();
 	void EndZoom();
-
-	ASweapon* CurrentWeapon;
-
+	
 	UPROPERTY(EditDefaultsOnly , Category = "Player")
 	TSubclassOf<ASweapon> StartWeaponClass;
 
@@ -88,4 +86,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual FVector GetPawnViewLocation() const override;
+
+	UPROPERTY(Replicated)
+	ASweapon* CurrentWeapon;
+
 };

@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "UEShootGame/UEShootGame.h"
 
 
@@ -38,21 +39,26 @@ void ASCharacter::BeginPlay()
 
 	//获取默认视场
 	DefaultFOV = CameraComp -> FieldOfView;
-
-	//设置碰撞参数
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	//设置默认武器
-	CurrentWeapon = GetWorld() -> SpawnActor<ASweapon>(StartWeaponClass , FVector::ZeroVector , FRotator::ZeroRotator , SpawnParameters);
-
-	if(CurrentWeapon)
-	{
-		CurrentWeapon -> SetOwner(this);
-		CurrentWeapon -> AttachToComponent(GetMesh() , FAttachmentTransformRules::SnapToTargetNotIncludingScale , "WeaponSocket");
-	}
-
+		
 	HealthComp -> OnHealthChanged.AddDynamic(this , &ASCharacter::OnHealthChanged);
+
+	//判断是否在服务器端
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		//设置碰撞参数
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		//设置默认武器
+		CurrentWeapon = GetWorld() -> SpawnActor<ASweapon>(StartWeaponClass , FVector::ZeroVector , FRotator::ZeroRotator , SpawnParameters);
+
+		if(CurrentWeapon)
+		{
+			CurrentWeapon -> SetOwner(this);
+			CurrentWeapon -> AttachToComponent(GetMesh() , FAttachmentTransformRules::SnapToTargetNotIncludingScale , "WeaponSocket");
+		}
+	}
+	
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -163,3 +169,9 @@ FVector ASCharacter::GetPawnViewLocation() const
 	return Super::GetPawnViewLocation();
 }
 
+void ASCharacter::GetLifetimeReplicatedProps( TArray< FLifetimeProperty > & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//同步本类中CurrentWeapon
+	DOREPLIFETIME( ASCharacter, CurrentWeapon);
+}

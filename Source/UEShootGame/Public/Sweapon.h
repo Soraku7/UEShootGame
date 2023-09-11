@@ -69,6 +69,9 @@ public:
 	UFUNCTION(BlueprintCallable , Category = "Weapon")
 	virtual void Fire();
 
+	UFUNCTION(Server , Reliable , WithValidation)
+	void ServerFire();
+	
 	void StartFire();
 	
 	void StopFire();
