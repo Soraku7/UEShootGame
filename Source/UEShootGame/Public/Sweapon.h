@@ -4,8 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Containers/EnumAsByte.h"
 #include "Sweapon.generated.h"
 
+//单次武器射击轨迹信息
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY();
+
+public:
+	UPROPERTY()
+	TEnumAsByte<EPhysicalSurface> SurfaceType;
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
+};
 UCLASS()
 class UESHOOTGAME_API ASweapon : public AActor
 {
@@ -26,6 +39,8 @@ protected:
 	USkeletalMeshComponent* MeshComp;
 	
 	void PlayFireEffect(FVector TraceEnd);
+
+	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
 	
 	UPROPERTY(VisibleDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
 	FName MuzzleSocketName;
@@ -42,7 +57,7 @@ protected:
 
 	//击中物体特效
 	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
-	UParticleSystem* DefultImpactEffect;
+	UParticleSystem* DefaultImpactEffect;
 	
 	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , Category = "Weapon")
 	UParticleSystem* TracerEffect;
@@ -65,6 +80,16 @@ protected:
 
 	//攻击间隔
 	float TimeBetweenShots;
+
+	//服务器改变时 在客户端进行同步
+	//网络射击信息  当结构体内容改变自动调用网络复制函数
+	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
+
+	//网络复制函数
+	UFUNCTION()
+	void OnRep_HitScanTrace();
+
 public:
 	UFUNCTION(BlueprintCallable , Category = "Weapon")
 	virtual void Fire();
