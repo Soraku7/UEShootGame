@@ -8,7 +8,7 @@ public class UEShootGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "PHYSICSCORE" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "PHYSICSCORE" , "NavigationSystem"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
