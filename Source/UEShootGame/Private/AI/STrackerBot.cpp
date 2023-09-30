@@ -40,6 +40,17 @@ void ASTrackerBot::HandleTakeDamage(USHealthComponent* OwningHealthComp, float H
 	const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	//UE_LOG(LogTemp , Log , TEXT("Health %s of %s") , *FString::SanitizeFloat(Health) , *GetName());
+
+	if(MatIns == nullptr)
+	{
+		MatIns = MeshComp -> CreateAndSetMaterialInstanceDynamicFromMaterial(0 , MeshComp -> GetMaterial(0));
+		
+	}
+	if(MatIns)
+	{
+		MatIns -> SetScalarParameterValue("LastTimeDamageTaken" , GetWorld() -> TimeSeconds);
+	}
+	
 }
 
 FVector ASTrackerBot::GetNextPathPoint()

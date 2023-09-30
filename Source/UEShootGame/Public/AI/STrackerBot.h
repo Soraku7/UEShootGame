@@ -43,6 +43,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly , Category = "TrackerBot")
 	bool bUseVelocityChange;
 
+	UMaterialInstanceDynamic* MatIns;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
