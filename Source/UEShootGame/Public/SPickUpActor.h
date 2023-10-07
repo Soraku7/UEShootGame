@@ -38,6 +38,7 @@ protected:
 	FTimerHandle TimerHandle_RespawnHandle;
 	
 	void ReSpawn();
+
 public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 };

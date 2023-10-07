@@ -17,6 +17,8 @@ ASPickUpActor::ASPickUpActor()
 	DecalComp -> SetupAttachment(RootComponent);
 
 	CooldownDuration = 10.0f;
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -24,7 +26,11 @@ void ASPickUpActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ReSpawn();
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		ReSpawn();
+	}
+	
 }
 
 void ASPickUpActor::ReSpawn()
@@ -42,13 +48,15 @@ void ASPickUpActor::ReSpawn()
 	PowerupInstance = GetWorld() -> SpawnActor<ASPowerupActor>(PowerUpClass , GetTransform() , SpawnParams);
 }
 
+
+
 void ASPickUpActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if(PowerupInstance)
+	if(PowerupInstance && GetLocalRole() == ROLE_Authority)
 	{
-		PowerupInstance -> ActivePowerup();
+		PowerupInstance -> ActivatePowerup(OtherActor);
 
 		PowerupInstance = nullptr;
 
